@@ -40,10 +40,14 @@ const Workspace = () => {
   const [showInviteChannelModal, setShowInviteChannelModal] = useState(false);
   const [newWorkspace, onChangeNewWorkspace, setNewWorkspace] = useInput('');
   const [newUrl, onChangeNewUrl, setNewUrl] = useInput('');
-  const { workspace } = useParams();
+  const { workspace, channel } = useParams();
 
   const { data: userData, error, mutate } = useSWR<IUser | false>('http://localhost:3095/api/users', fetcher, { dedupingInterval: 2000 });
   const { data: channelData } = useSWR<IChannel[]>(userData ? `http://localhost:3095/api/workspaces/${workspace}/channels` : null, fetcher);
+  const { data: memberData ,mutate: revalidateMembers } = useSWR<IUser[]>(
+    userData ? `http://localhost:3095/api/workspaces/${workspace}/channel/${channel}/members` : null,
+    fetcher,
+  );
 
   const onLogout = useCallback(() => {
     axios.post('http://localhost:3095/api/users/logout', null, {
